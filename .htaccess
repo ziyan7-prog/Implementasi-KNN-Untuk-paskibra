@@ -1,0 +1,36 @@
+Options -Indexes
+ServerSignature Off
+
+# ── Proteksi Direktori Sensitif ─────────────────────────
+<FilesMatch "\.(sql|log|md|json|lock|env)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /sipaskibraka/
+
+  # Blokir akses langsung ke config & includes
+  RewriteRule ^config/       - [F,L]
+  RewriteRule ^includes/     - [F,L]
+
+  # Redirect root ke login
+  RewriteRule ^$ login.php [R=302,L]
+</IfModule>
+
+# ── Keamanan Header ──────────────────────────────────────
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── PHP Settings ─────────────────────────────────────────
+<IfModule mod_php.c>
+  php_value upload_max_filesize 10M
+  php_value post_max_size 10M
+  php_value max_execution_time 60
+  php_value session.cookie_httponly 1
+</IfModule>
